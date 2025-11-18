@@ -112,6 +112,37 @@ app.post("/board", async (req, res) => {
 });
 
 // 수정
+app.put("/board", async (req, res) => {
+  console.log(req.body); // :id가 파라미터
+  const { title, content, author, id } = req.body;
+
+  console.log(title, content, author, id);
+  let connection;
+  try {
+    connection = await db.getConnection();
+    let result = await connection.execute(
+      `update board
+       set       title = :title,
+                 content = :content,
+                 author = :author
+       where board_id = :id`,
+      [title, content, author, id],
+      { autoCommit: true } // 자동커밋
+    );
+    //connection.commit(); // 커밋.
+    console.log(result);
+    //res.send("조회완료");
+    res.json(result); // 웹 화면 보여짐
+  } catch (err) {
+    console.log(err);
+    res.send("예외발생");
+  } finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+});
+
 app.listen(port, () => {
   console.log(`Express 서버가 실행중....http://localhost:${port}`);
 });
